@@ -12,20 +12,32 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Map;
 
 @RestController
 public class JumpsController {
 
     @GetMapping("/jump")
-    Response jumpGet(){
+    Response jumpGet(@RequestHeader Map<String, String> headers){
         System.out.println("Received GET /jump");
+        // Print Headers
+        headers.forEach((key, value) -> {
+            System.out.println(String.format("Header '%s' = %s", key, value));
+        });
         Response response = new Response("/jump - Greetings from Spring Boot!",200 );
         System.out.println("Sending GET Response /jump - " + response.toString());
         return response;
     }
 
     @PostMapping("/jump")
-    Response jumpPost(@Valid @RequestBody JumpDto newJump) throws IOException {
+    Response jumpPost(@Valid
+                      @RequestBody JumpDto newJump,
+                      @RequestHeader Map<String, String> headers) throws IOException {
+        System.out.println("Received POST /jump");
+        // Print Headers
+        headers.forEach((key, value) -> {
+            System.out.println(String.format("Header '%s' = %s", key, value));
+        });
 
         Jump jump = JumpMapper.INSTANCE.jumpDTOtoJump(newJump);
         Response response = new Response("/jump - Farewell from Spring Boot! Error by default",400 );
@@ -43,6 +55,7 @@ public class JumpsController {
             HttpURLConnection con = create(url);
 
             // Perform GET
+            con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
             con.setRequestMethod("GET");
 
             // Handle Response
@@ -79,6 +92,7 @@ public class JumpsController {
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
             con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
             con.setDoOutput(true);
             String jsonInputString = new Gson().toJson(jumpPost);
             try (OutputStream os = con.getOutputStream()) {

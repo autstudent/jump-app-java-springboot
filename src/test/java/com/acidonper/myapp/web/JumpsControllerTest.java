@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -76,7 +78,9 @@ class JumpsControllerTest {
 
         // Make call
         JumpDto jumpDto = new JumpDto("test","/", "/jump", new String[] {url});
-        Response status = app.jumpPost(jumpDto);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("test", "test");
+        Response status = app.jumpPost(jumpDto, headers);
 
         // Expect value
         Assertions.assertEquals(responseExpected.toString(), status.toString());
@@ -102,7 +106,9 @@ class JumpsControllerTest {
 
         // Make call
         JumpDto jumpDtoMulti = new JumpDto("test","/", "/jump", new String[] {url1, url2});
-        Response status = appMulti.jumpPost(jumpDtoMulti);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("test", "test");
+        Response status = appMulti.jumpPost(jumpDtoMulti, headers);
 
         // Expect value
         Assertions.assertEquals(responseExpected.toString(), status.toString());

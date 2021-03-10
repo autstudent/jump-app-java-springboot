@@ -56,6 +56,7 @@ public class JumpsController {
 
             // Perform GET
             con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
+            con.setRequestProperty("x-trace-id", headers.get("x-trace-id"));
             con.setRequestMethod("GET");
 
             // Handle Response
@@ -93,6 +94,7 @@ public class JumpsController {
             con.setRequestProperty("Content-Type", "application/json; utf-8");
             con.setRequestProperty("Accept", "application/json");
             con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
+            con.setRequestProperty("x-trace-id", headers.get("x-trace-id"));
             con.setDoOutput(true);
             String jsonInputString = new Gson().toJson(jumpPost);
             try (OutputStream os = con.getOutputStream()) {

@@ -57,6 +57,11 @@ public class JumpsController {
             // Perform GET
             con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
             con.setRequestProperty("x-request-id", headers.get("x-request-id"));
+            con.setRequestProperty("x-b3-spanid", headers.get("x-b3-spanid"));
+            con.setRequestProperty("x-b3-parentspanid", headers.get("x-b3-parentspanid"));
+            con.setRequestProperty("x-b3-sampled", headers.get("x-b3-sampled"));
+            con.setRequestProperty("x-b3-flags", headers.get("x-b3-flags"));
+            con.setRequestProperty("x-ot-span-context", headers.get("x-ot-span-context"));
             con.setRequestMethod("GET");
 
             // Handle Response
@@ -95,6 +100,11 @@ public class JumpsController {
             con.setRequestProperty("Accept", "application/json");
             con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
             con.setRequestProperty("x-request-id", headers.get("x-request-id"));
+            con.setRequestProperty("x-b3-spanid", headers.get("x-b3-spanid"));
+            con.setRequestProperty("x-b3-parentspanid", headers.get("x-b3-parentspanid"));
+            con.setRequestProperty("x-b3-sampled", headers.get("x-b3-sampled"));
+            con.setRequestProperty("x-b3-flags", headers.get("x-b3-flags"));
+            con.setRequestProperty("x-ot-span-context", headers.get("x-ot-span-context"));
             con.setDoOutput(true);
             String jsonInputString = new Gson().toJson(jumpPost);
             try (OutputStream os = con.getOutputStream()) {

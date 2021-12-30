@@ -73,6 +73,6 @@ curl -XPOST -H "Content-type: application/json" -v -d '{
 
 ## Author Information
 
-Asier Cidon @Red Hat
+Asier Cidon @RedHat test
 
 asier.cidon@gmail.com

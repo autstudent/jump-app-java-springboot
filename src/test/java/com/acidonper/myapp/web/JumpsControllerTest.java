@@ -13,9 +13,8 @@ import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,25 +22,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class JumpsControllerTest {
-
-    @Autowired
-    private MockMvc mvc;
-
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Mock
     HttpURLConnection connection;
@@ -57,9 +44,27 @@ class JumpsControllerTest {
 
     @Test
     public void getJump() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/jump").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("{\"message\":\"/jump - Greetings from Spring Boot!\",\"code\":200}")));
+        String url = "http://localhost:8443";
+        URL urlTest = new URL(url + "/");
+
+        // Generate Expected response mocking connection
+        Response responseExpected = new Response("/jump - Greetings from Spring Boot!",200);
+        InputStream input = new ByteArrayInputStream(new Gson().toJson(responseExpected).getBytes("UTF-8"));
+        Mockito.doReturn(connection).when(app).create(urlTest);
+        Mockito.doReturn(input).when(connection).getInputStream();
+
+        // Make call
+        Map<String, String> headers = new HashMap<>();
+        headers.put("test", "test");
+        ResponseEntity<String> status = app.jumpGet(headers);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String responseExpectedjson = mapper.writeValueAsString(responseExpected);
+        String statusResponsejson = mapper.writeValueAsString(status.getBody());
+
+        // Expect value
+        Assertions.assertEquals(responseExpectedjson, statusResponsejson);
+
     }
     @Test
     public void postJumpSingle() throws Exception {
@@ -76,10 +81,16 @@ class JumpsControllerTest {
 
         // Make call
         JumpDto jumpDto = new JumpDto("test","/", "/jump", new String[] {url});
-        Response status = app.jumpPost(jumpDto);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("test", "test");
+        ResponseEntity<String> status = app.jumpPost(jumpDto, headers);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String responseExpectedjson = mapper.writeValueAsString(responseExpected);
+        String statusResponsejson = mapper.writeValueAsString(status.getBody());
 
         // Expect value
-        Assertions.assertEquals(responseExpected.toString(), status.toString());
+        Assertions.assertEquals(responseExpectedjson, statusResponsejson);
     }
 
     @Test
@@ -102,9 +113,15 @@ class JumpsControllerTest {
 
         // Make call
         JumpDto jumpDtoMulti = new JumpDto("test","/", "/jump", new String[] {url1, url2});
-        Response status = appMulti.jumpPost(jumpDtoMulti);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("test", "test");
+        ResponseEntity<String> status = appMulti.jumpPost(jumpDtoMulti, headers);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String responseExpectedjson = mapper.writeValueAsString(responseExpected);
+        String statusResponsejson = mapper.writeValueAsString(status.getBody());
 
         // Expect value
-        Assertions.assertEquals(responseExpected.toString(), status.toString());
+        Assertions.assertEquals(responseExpectedjson, statusResponsejson);
     }
 }

@@ -5,6 +5,9 @@ import com.acidonper.myapp.entities.Jump;
 import com.acidonper.myapp.entities.Response;
 import com.acidonper.myapp.mappers.JumpMapper;
 import com.google.gson.Gson;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -12,20 +15,44 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Map;
 
 @RestController
 public class JumpsController {
 
     @GetMapping("/jump")
-    Response jumpGet(){
+    ResponseEntity<String> jumpGet(@RequestHeader Map<String, String> headers){
         System.out.println("Received GET /jump");
+        // Print Headers
+        headers.forEach((key, value) -> {
+            System.out.println(String.format("Header '%s' = %s", key, value));
+        });
         Response response = new Response("/jump - Greetings from Spring Boot!",200 );
         System.out.println("Sending GET Response /jump - " + response.toString());
-        return response;
+
+        // Build response
+        System.out.println("Responding GET Response /jump - " + response.toString());
+        HttpHeaders resHeaders = new HttpHeaders();
+        resHeaders.add("Content-Type", "application/json");
+        resHeaders.add("React-Modifier", headers.get("React-Modifier"));
+        resHeaders.add("X-Request-Id", headers.get("X-Request-Id"));
+        resHeaders.add("X-B3-Spanid", headers.get("X-B3-Spanid"));
+        resHeaders.add("X-B3-Parentspanid", headers.get("X-B3-Parentspanid"));
+        resHeaders.add("X-B3-Sampled", headers.get("X-B3-Sampled"));
+        resHeaders.add("X-B3-Flags", headers.get("X-B3-Flags"));
+        resHeaders.add("X-Ot-Span-Context", headers.get("X-Ot-Span-Context"));
+        return new ResponseEntity(response, resHeaders, HttpStatus.OK);
     }
 
     @PostMapping("/jump")
-    Response jumpPost(@Valid @RequestBody JumpDto newJump) throws IOException {
+    ResponseEntity<String> jumpPost(@Valid
+                      @RequestBody JumpDto newJump,
+                      @RequestHeader Map<String, String> headers) throws IOException {
+        System.out.println("Received POST /jump");
+        // Print Headers
+        headers.forEach((key, value) -> {
+            System.out.println(String.format("Header '%s' = %s", key, value));
+        });
 
         Jump jump = JumpMapper.INSTANCE.jumpDTOtoJump(newJump);
         Response response = new Response("/jump - Farewell from Spring Boot! Error by default",400 );
@@ -43,6 +70,14 @@ public class JumpsController {
             HttpURLConnection con = create(url);
 
             // Perform GET
+            System.out.println("Sending GET Response /jump to " + url);
+            con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
+            con.setRequestProperty("X-Request-Id", headers.get("x-request-id"));
+            con.setRequestProperty("X-B3-Spanid", headers.get("x-b3-spanid"));
+            con.setRequestProperty("X-B3-Parentspanid", headers.get("x-b3-parentspanid"));
+            con.setRequestProperty("X-B3-Sampled", headers.get("x-b3-sampled"));
+            con.setRequestProperty("X-B3-Flags", headers.get("x-b3-Flags"));
+            con.setRequestProperty("X-Ot-Span-Context", headers.get("x-ot-span-context"));
             con.setRequestMethod("GET");
 
             // Handle Response
@@ -54,9 +89,9 @@ public class JumpsController {
                 while ((responseLine = br.readLine()) != null) {
                     getResponse.append(responseLine.trim());
                 }
-
                 // Generate Response
                 response = new Gson().fromJson(getResponse.toString(), Response.class);
+                System.out.println(con.getHeaderFields());
             } catch (Exception error) {
                 response.message = "/jump - Farewell from Spring Boot! Error jumping";
                 response.code = 400;
@@ -76,9 +111,17 @@ public class JumpsController {
             jumpPost.jumps = jumpsPost;
 
             // Perform POST
+            System.out.println("Sending POST Response /jump to " + url);
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
             con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("React-Modifier", headers.get("react-modifier"));
+            con.setRequestProperty("X-Request-Id", headers.get("x-request-id"));
+            con.setRequestProperty("X-B3-Spanid", headers.get("x-b3-spanid"));
+            con.setRequestProperty("X-B3-Parentspanid", headers.get("x-b3-parentspanid"));
+            con.setRequestProperty("X-B3-Sampled", headers.get("x-b3-sampled"));
+            con.setRequestProperty("X-B3-Flags", headers.get("x-b3-Flags"));
+            con.setRequestProperty("X-Ot-Span-Context", headers.get("x-ot-span-context"));
             con.setDoOutput(true);
             String jsonInputString = new Gson().toJson(jumpPost);
             try (OutputStream os = con.getOutputStream()) {
@@ -104,9 +147,18 @@ public class JumpsController {
             }
         }
 
-        // Send Response
-        System.out.println("Sending POST Response /jump - " + response.toString());
-        return response;
+        // Build Response
+        System.out.println("Responding POST Response /jump - " + response.toString());
+        HttpHeaders resHeaders = new HttpHeaders();
+        resHeaders.add("Content-Type", "application/json");
+        resHeaders.add("React-Modifier", headers.get("React-Modifier"));
+        resHeaders.add("X-Request-Id", headers.get("X-Request-Id"));
+        resHeaders.add("X-B3-Spanid", headers.get("X-B3-Spanid"));
+        resHeaders.add("X-B3-Parentspanid", headers.get("X-B3-Parentspanid"));
+        resHeaders.add("X-B3-Sampled", headers.get("X-B3-Sampled"));
+        resHeaders.add("X-B3-Flags", headers.get("X-B3-Flags"));
+        resHeaders.add("X-Ot-Span-Context", headers.get("X-Ot-Span-Context"));
+        return new ResponseEntity(response, resHeaders, HttpStatus.OK);
     }
 
     HttpURLConnection create(URL url) throws IOException {

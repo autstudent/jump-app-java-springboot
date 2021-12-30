@@ -67,11 +67,12 @@ curl -XPOST -H "Content-type: application/json" -v -d '{
       "http://localhost:8442",
       "http://localhost:8443"
     ]
+
 }' 'localhost:8442/jump'
 
 
 ## Author Information
 
-Asier Cidon @Red Hat
+Asier Cidon @RedHat test
 
 asier.cidon@gmail.com
